@@ -11,7 +11,7 @@ from app.api.gemini.entAnalysis import analyze_sentiment
 from app.services.audio_preprocess import preprocess_audio
 
 app = FastAPI()
-model = whisper.load_model("medium")  # "base" → "medium"
+model = whisper.load_model("base")  # tiny, base, small, medium, large
 
 # 保存先ディレクトリ
 SOUNDS_DIR = "sounds"
@@ -45,8 +45,12 @@ async def transcribe(file: UploadFile = File(...)):
         preprocess_audio(wav_path, wav_path)
 
         # --- Whisper で文字起こし ---
-        result = model.transcribe(wav_path, language="ja", fp16=False)
-
+        result = model.transcribe(
+            wav_path, language="ja",
+            fp16=False,temperature=0.2,
+            best_of=3,beam_size=3,
+            suppress_tokens=[-1]
+        )
         # --- 感情分析 ---
         analyze = analyze_sentiment(result["text"])
 

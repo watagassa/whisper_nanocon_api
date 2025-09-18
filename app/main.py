@@ -9,6 +9,7 @@ from shutil import copyfile
 from pydub import AudioSegment
 from app.api.gemini.entAnalysis import analyze_sentiment
 from app.services.audio_preprocess import preprocess_audio
+from app.services.silero_vad import split_audio_with_vad
 
 app = FastAPI()
 model = whisper.load_model("base")  # tiny, base, small, medium, large
@@ -43,16 +44,28 @@ async def transcribe(file: UploadFile = File(...)):
 
         # --- 前処理 (ノイズ除去・正規化) ---
         preprocess_audio(wav_path, wav_path)
-
-        # --- Whisper で文字起こし ---
-        result = model.transcribe(
-            wav_path, language="ja",
-            fp16=False,temperature=0.2,
-            best_of=3,beam_size=3,
-            suppress_tokens=[-1]
-        )
+        split_result = split_audio_with_vad(wav_path)  # VADで分割
+        
+        full_text_lines = []
+        for i, file_path in enumerate(split_result.files):
+            print(f"chunk_{i}: {split_result.timestamps[i]} -> {file_path}")
+            result = model.transcribe(
+                file_path, language="ja",
+                fp16=False,temperature=0.0,
+                best_of=3,beam_size=5,
+                suppress_tokens=[-1]
+            )
+                # Whisperの出力を整形
+            line = result["text"].strip()
+            if line:  # 空じゃなければ追加
+                full_text_lines.append(line)
+                
+        # 文ごとに改行したテキスト
+        final_text = "\n".join(full_text_lines)
+        print("=== Final Text ===")
+        print(final_text)   
         # --- 感情分析 ---
-        analyze = analyze_sentiment(result["text"])
+        analyze = analyze_sentiment(final_text)
 
         # --- sounds フォルダに保存 ---
         mp4_filename = os.path.join(SOUNDS_DIR, os.path.basename(tmp_path))
@@ -61,7 +74,7 @@ async def transcribe(file: UploadFile = File(...)):
         copyfile(wav_path, wav_filename)
 
         return {
-            "text": result["text"],
+            "text": final_text,
             "analyze": analyze,
             "saved_mp4": mp4_filename,
             "saved_wav": wav_filename

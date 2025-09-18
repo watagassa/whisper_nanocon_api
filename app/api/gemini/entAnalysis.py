@@ -14,8 +14,11 @@ def analyze_sentiment(text):
     Analyze the sentiment of the following text and return JSON.
     The JSON must contain:
     - "sentiment" : one of ["positive","neutral","negative"]
-    - "score" : a float between 0 and 1
-    - "hsv" : an array [h, s, v], each value between 0 and 1
+    - "score" : a float between 0 and 1, representing the intensity of the sentiment
+    - "ths" : an array [t, h, s]
+        - "t" : LED blinking period (float, between 0 and 1)
+        - "h" : hue (float, between 0 and 1)
+        - "s" : saturation (float, between 0 and 1)
 
     Text: "{text}"
     """

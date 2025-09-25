@@ -30,7 +30,7 @@ app.add_middleware(
 @app.post("/transcribe")
 async def transcribe(file: UploadFile = File(...)):
     # 一時ファイル (mp4) に保存
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".m4a") as tmp:
         tmp.write(await file.read())
         tmp_path = tmp.name
 
@@ -63,9 +63,17 @@ async def transcribe(file: UploadFile = File(...)):
         # 文ごとに改行したテキスト
         final_text = "\n".join(full_text_lines)
         print("=== Final Text ===")
-        print(final_text)   
-        # --- 感情分析 ---
-        analyze = analyze_sentiment(final_text)
+        print(final_text)
+        if final_text == "":
+            final_text = "音声が短すぎて認識できませんでした。"
+            analyze = {
+                "sentiment": "neutral",
+                "score": 0.0,
+                "ths": [0.0, 0.0, 0.0]
+            }
+        else:
+            # --- 感情分析 ---
+            analyze = analyze_sentiment(final_text)
 
         # --- sounds フォルダに保存 ---
         mp4_filename = os.path.join(SOUNDS_DIR, os.path.basename(tmp_path))

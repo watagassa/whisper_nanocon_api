@@ -14,7 +14,7 @@ from app.api.gemini.wavToAnalysis import analyze_audio_emotion
 from app.api.gemini.charAnalyzeSentiment import char_analyze_sentiment
 
 app = FastAPI()
-model = whisper.load_model("base")  # tiny, base, small, medium, large
+model = whisper.load_model("tiny")  # tiny, base, small, medium, large
 
 # 保存先ディレクトリ
 SOUNDS_DIR = "sounds"

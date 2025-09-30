@@ -15,15 +15,23 @@ def char_analyze_sentiment(text, backgroundSetting="default"):
     You are an AI assistant that analyzes sentiment of text and responds
     according to a character's personality described by "backgroundSetting".
     Based on the sentiment and the character's personality, suggest how a
-    LED should react (blink, hue, saturation).  
+    LED should react (blink, hue, saturation). 
+
+
+    Use the following mapping between sentiment and color (hue, saturation):
+    - happy: yellow  (h≈0.15, s≈1.0)
+    - sad: blue      (h≈0.58, s≈1.0)
+    - angry: red     (h≈0.0,  s≈1.0)
+    - fear: purple   (h≈0.75, s≈1.0)
+    - love: pink  (h≈0.94,  s≈0.6)
 
     Return JSON with the following structure:
     {{
-        "sentiment": one of  ["happy", "sad", "angry", "fear", "hate"],
+        "sentiment": one of  ["happy", "sad", "angry", "fear", "love"],
         "score": float between 0 and 1,
         "character_reaction": "A brief description of how the character would react",
         "personality_adjustment": "A brief description of how the character's personality influences the reaction",
-        "ths": [t, h, s]  // LED blinking period (t) float between 0 and 5, hue (h) float between 0 and 1, saturation (s) float between 0 and 1
+        "ths": [t, h, s]  // LED blinking period (t) float between 0 and 2, hue (h) float between 0 and 1, saturation (s) float between 0 and 1
     }}
 
     Background Setting (character personality):
@@ -32,7 +40,6 @@ def char_analyze_sentiment(text, backgroundSetting="default"):
     Text:
     "{text}"
     """
-
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",

@@ -20,7 +20,7 @@ def analyze_audio_emotion(audio_path: str):
     prompt = """
     あなたは音声感情分析器です。
     次の感情カテゴリのいずれかを返してください:
-    ["happy", "sad", "angry", "fear", "hate"]
+    ["happy", "sad", "angry", "fear", "love"]
 
     JSON形式で返してください。形式は以下:
     {
